@@ -4,16 +4,17 @@
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [simple-queue.core :as q]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [environ.core :refer [env]]))
 
 (defonce queue (atom {}))
 
 (defn trigger [body]
-  (q/publish @queue (json/write-str (:request-cookie body)))
+  (q/publish @queue (json/write-str {:event "download-new-messages" :available-at (env :jive-uri)}))
   "published message")
 
 (defroutes app-routes
-  (POST "/trigger"  req (trigger (:body req)))
+  (POST "/trigger" req (trigger (:body req)))
   (route/not-found "Not Found"))
 
 (def app
@@ -27,4 +28,4 @@
   (reset! queue {}))
 
 (defn init []
-  (reset! queue (q/create-queue "rapids")))
+  (reset! queue (q/create-queue "test" (env :queue-uri))))
