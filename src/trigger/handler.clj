@@ -28,4 +28,5 @@
   (reset! queue {}))
 
 (defn init []
+  (println (env :queue-uri))
   (reset! queue (q/create-queue "test" {:uri (env :queue-uri)})))
